@@ -13,7 +13,12 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useSchematicEntitlement } from '@schematichq/schematic-react';
 import { Button } from './ui/button';
-import { AlertCircle, CheckCircle, CloudUpload, ArrowDownCircle } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle,
+  CloudUpload,
+  ArrowDownCircle,
+} from 'lucide-react';
 import {
   compressImage,
   isCompressibleImage,
@@ -81,8 +86,8 @@ function PDFDropzone() {
             try {
               fileToUpload = await compressImage(file, {
                 ...DEFAULT_COMPRESSION_OPTIONS,
-                onProgress: (status: string, progress: number) => {
-                  setCompressionStatus(`Compressing: ${status}`);
+                onProgress: (progress: number) => {
+                  setCompressionStatus(`Compressing...`);
                   setCompressionProgress(progress);
                 },
               });
@@ -91,7 +96,7 @@ function PDFDropzone() {
                 `✓ Image compressed from ${originalSize} to ${compressedSize}`
               );
               setCompressionProgress(100);
-              
+
               // Show compression results for 1.5 seconds
               await new Promise(resolve => setTimeout(resolve, 1500));
             } catch (compressionError) {
@@ -121,12 +126,14 @@ function PDFDropzone() {
           try {
             // Call the server action to handle the upload
             const result = await uploadPDF(formData);
-            
+
             if (!result.success) {
               throw new Error(result.error);
             }
 
-            setCompressionStatus(`✓ Receipt processed successfully: ${fileToUpload.name}`);
+            setCompressionStatus(
+              `✓ Receipt processed successfully: ${fileToUpload.name}`
+            );
             setCompressionProgress(100);
             newUploadedFiles.push(fileToUpload.name);
 
@@ -236,10 +243,10 @@ function PDFDropzone() {
             <div className="flex flex-col items-center">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-2"></div>
               <p className="mb-2">
-                {compressionStatus.includes('Compressing') 
-                  ? 'Compressing Image...' 
-                  : compressionStatus.includes('Processing with AI') 
-                    ? 'Processing Receipt with AI...' 
+                {compressionStatus.includes('Compressing')
+                  ? 'Compressing Image...'
+                  : compressionStatus.includes('Processing with AI')
+                    ? 'Processing Receipt with AI...'
                     : 'Processing...'}
               </p>
               {compressionStatus && (
@@ -250,7 +257,7 @@ function PDFDropzone() {
                   </div>
                   {compressionProgress > 0 && (
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
                         style={{ width: `${compressionProgress}%` }}
                       ></div>

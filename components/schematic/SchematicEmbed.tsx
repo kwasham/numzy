@@ -5,16 +5,18 @@ import {
   EmbedProvider,
 } from '@schematichq/schematic-components';
 
-function SchematicEmbed({
-  accessToken,
-  componentId,
-}) {
+interface SchematicEmbedProps {
+  accessToken: string;
+  componentId: string;
+}
+
+function SchematicEmbed({ accessToken, componentId }: SchematicEmbedProps) {
   console.log(accessToken);
   return (
-  <EmbedProvider>
-    <SchematicEmbedComponent accessToken={accessToken} id={componentId} />
-  </EmbedProvider>
-  )
+    <EmbedProvider>
+      <SchematicEmbedComponent accessToken={accessToken} id={componentId} />
+    </EmbedProvider>
+  );
 }
 
 export default SchematicEmbed;

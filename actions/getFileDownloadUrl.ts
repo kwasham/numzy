@@ -1,7 +1,7 @@
 "use server"
 
 import { api } from "@/convex/_generated/api"
-import { id } from "@/convex/_generated/dataModel"
+import { Id } from "@/convex/_generated/dataModel"
 import convex from "@/lib/convexClient"
 
 // server action to get a url for a file tin convex storage

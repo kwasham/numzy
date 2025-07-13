@@ -45,3 +45,12 @@ package-lock.json
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+
+userdata.sh
+
+# Temporary development files
+IMG_*.jpg
+*_fixed.*
+*_new.*
+lib/imageCompression*.ts

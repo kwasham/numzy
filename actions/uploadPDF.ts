@@ -50,7 +50,7 @@ interface ReceiptProcessingResult {
   error_message: string | null;
 }
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://3.237.238.131:8000';
 
 // // Query receipts needing audit:
 // const auditReceipts = await convex.query(api.receipts.getReceiptsNeedingAudit, {
@@ -77,10 +77,10 @@ export default async function uploadFile(formData: FormData) {
       return { success: false, error: 'No file provided' };
     }
 
-    // Validate file type - accept images and PDFs
+    // Validate file type - accept both images and PDFs
     const isValidImage =
       file.type.startsWith('image/') ||
-      ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'].some(ext =>
+      ['jpg', 'jpeg', 'png', 'gif', 'webp'].some(ext =>
         file.name.toLowerCase().endsWith(`.${ext}`)
       );
 
@@ -92,7 +92,7 @@ export default async function uploadFile(formData: FormData) {
       return {
         success: false,
         error:
-          'Only image files (JPG, PNG, GIF, WebP, HEIC) and PDF files are allowed',
+          'Only image files (JPG, PNG, GIF, WebP) and PDF files are allowed',
       };
     }
 
@@ -146,79 +146,69 @@ export default async function uploadFile(formData: FormData) {
         console.log('Processing result:', processingResult);
 
         // Update the receipt with all extracted data using new schema
-        if (processingResult) {
-          await convex.mutation(
-            api.receipts.updateReceiptWithProcessingResult,
-            {
-              id: receiptId,
-              processingResult: {
-                // Processing status
-                processing_successful: processingResult.processing_successful,
-                error_message: processingResult.error_message || undefined,
+        await convex.mutation(api.receipts.updateReceiptWithProcessingResult, {
+          id: receiptId,
+          processingResult: {
+            // Processing status
+            processing_successful: processingResult.processing_successful,
+            error_message: processingResult.error_message || undefined,
 
-                // Receipt details
-                receipt_details: {
-                  merchant:
-                    processingResult.receipt_details.merchant || undefined,
-                  location: {
-                    city:
-                      processingResult.receipt_details.location.city ||
-                      undefined,
-                    state:
-                      processingResult.receipt_details.location.state ||
-                      undefined,
-                    zipcode:
-                      processingResult.receipt_details.location.zipcode ||
-                      undefined,
-                  },
-                  time: processingResult.receipt_details.time || undefined, //
-                  transaction_id:
-                    processingResult.receipt_details.transaction_id ||
-                    undefined,
-                  subtotal:
-                    processingResult.receipt_details.subtotal || undefined,
-                  tax: processingResult.receipt_details.tax || undefined,
-                  total: processingResult.receipt_details.total || undefined,
-                  handwritten_notes:
-                    processingResult.receipt_details.handwritten_notes || [],
-                  items:
-                    processingResult.receipt_details?.items.map(item => ({
-                      description: item.description || undefined,
-                      product_code: item.product_code || undefined,
-                      category: item.category || undefined,
-                      item_price: item.item_price || undefined,
-                      sale_price: item.sale_price || undefined,
-                      quantity: item.quantity || undefined,
-                      total: item.total || undefined,
-                    })) || [],
-                },
-
-                // Audit decision
-                audit_decision: {
-                  not_travel_related:
-                    processingResult.audit_decision.not_travel_related,
-                  amount_over_limit:
-                    processingResult.audit_decision.amount_over_limit,
-                  math_error: processingResult.audit_decision.math_error,
-                  handwritten_x: processingResult.audit_decision.handwritten_x,
-                  reasoning: processingResult.audit_decision.reasoning,
-                  needs_audit: processingResult.audit_decision.needs_audit,
-                },
+            // Receipt details
+            receipt_details: {
+              merchant: processingResult.receipt_details.merchant || undefined,
+              location: {
+                city:
+                  processingResult.receipt_details.location.city || undefined,
+                state:
+                  processingResult.receipt_details.location.state || undefined,
+                zipcode:
+                  processingResult.receipt_details.location.zipcode ||
+                  undefined,
               },
-            }
-          );
+              time: processingResult.receipt_details.time || undefined, //
+              transaction_id:
+                processingResult.receipt_details.transaction_id || undefined,
+              subtotal: processingResult.receipt_details.subtotal || undefined,
+              tax: processingResult.receipt_details.tax || undefined,
+              total: processingResult.receipt_details.total || undefined,
+              handwritten_notes:
+                processingResult.receipt_details.handwritten_notes || [],
+              items:
+                processingResult.receipt_details?.items.map(item => ({
+                  description: item.description || undefined,
+                  product_code: item.product_code || undefined,
+                  category: item.category || undefined,
+                  item_price: item.item_price || undefined,
+                  sale_price: item.sale_price || undefined,
+                  quantity: item.quantity || undefined,
+                  total: item.total || undefined,
+                })) || [],
+            },
 
-          // Track the scan event
-          await client.track({
-            event: 'scan',
-            company: {
-              id: user.id,
+            // Audit decision
+            audit_decision: {
+              not_travel_related:
+                processingResult.audit_decision.not_travel_related,
+              amount_over_limit:
+                processingResult.audit_decision.amount_over_limit,
+              math_error: processingResult.audit_decision.math_error,
+              handwritten_x: processingResult.audit_decision.handwritten_x,
+              reasoning: processingResult.audit_decision.reasoning,
+              needs_audit: processingResult.audit_decision.needs_audit,
             },
-            user: {
-              id: user.id,
-            },
-          });
-        }
+          },
+        });
+
+        // Track the scan event
+        await client.track({
+          event: 'scan',
+          company: {
+            id: user.id,
+          },
+          user: {
+            id: user.id,
+          },
+        });
       } else {
         console.error('FastAPI request failed:', response.statusText);
 

@@ -10,7 +10,7 @@ function ManagePlan() {
       </p>
       <SchematicComponent
         componentId={
-          process.env.NEXT_PUBLIC_SCHEMATIC_CUSTOMER_PORTAL_COMPONENT_ID || ''
+          process.env.NEXT_PUBLIC_SCHEMATIC_CUSTOMER_PORTAL_COMPONENT_ID
         }
       />
     </div>

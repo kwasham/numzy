@@ -15,7 +15,7 @@ function Header() {
     >
       <Link href="/" className="flex items-center">
         <ReceiptTextIcon className="w-6 h-6 text-blue-600 mr-2" />
-        <h1 className="text-xl font-bold">Numzy</h1>
+        <h1 className="text-xl font-bold text-gray-900">Numzy</h1>
       </Link>
       <div className="flex items-center space-x-4">
         <SignedIn>
@@ -29,7 +29,7 @@ function Header() {
         </SignedIn>
         <SignedOut>
           <SignInButton mode="modal">
-            <Button >Login</Button>
+            <Button>Login</Button>
           </SignInButton>
         </SignedOut>
       </div>

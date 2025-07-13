@@ -13,25 +13,12 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useSchematicEntitlement } from '@schematichq/schematic-react';
 import { Button } from './ui/button';
-import {
-  AlertCircle,
-  CheckCircle,
-  CloudUpload,
-  ArrowDownCircle,
-} from 'lucide-react';
-import {
-  compressImage,
-  isCompressibleImage,
-  formatFileSize,
-  DEFAULT_COMPRESSION_OPTIONS,
-} from '@/lib/imageCompression';
+import { AlertCircle, CheckCircle, CloudUpload } from 'lucide-react';
 
 function PDFDropzone() {
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<string>([]);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const [compressionStatus, setCompressionStatus] = useState<string>('');
-  const [compressionProgress, setCompressionProgress] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { user } = useUser();
@@ -51,137 +38,53 @@ function PDFDropzone() {
       }
 
       const fileArray = Array.from(files);
-      const validFiles = fileArray.filter(
+      const pdfFiles = fileArray.filter(
         file =>
-          file.type === 'application/pdf' ||
+          file.type === 'application/pdf' || 
           file.name.toLowerCase().endsWith('.pdf') ||
-          isCompressibleImage(file)
+          file.name.toLowerCase().endsWith('.jpg')
       );
 
-      if (validFiles.length === 0) {
-        alert('Please upload only PDF files or images (JPG, PNG, HEIC, WebP).');
+      if (pdfFiles.length === 0) {
+        alert('Please drop only PDF files.');
         return;
       }
 
       setIsUploading(true);
-      setCompressionStatus('');
-      setCompressionProgress(0);
 
       try {
         // Upload files
         const newUploadedFiles: string[] = [];
 
-        for (let i = 0; i < validFiles.length; i++) {
-          const file = validFiles[i];
-          let fileToUpload = file;
-
-          // Compress images if needed
-          if (isCompressibleImage(file)) {
-            const originalSize = formatFileSize(file.size);
-            setCompressionStatus(
-              `Compressing image: ${file.name} (${originalSize})...`
-            );
-            setCompressionProgress(0);
-
-            try {
-              fileToUpload = await compressImage(file, {
-                ...DEFAULT_COMPRESSION_OPTIONS,
-                onProgress: (progress: number) => {
-                  setCompressionStatus(`Compressing...`);
-                  setCompressionProgress(progress);
-                },
-              });
-              const compressedSize = formatFileSize(fileToUpload.size);
-              setCompressionStatus(
-                `✓ Image compressed from ${originalSize} to ${compressedSize}`
-              );
-              setCompressionProgress(100);
-
-              // Show compression results for 1.5 seconds
-              await new Promise(resolve => setTimeout(resolve, 1500));
-            } catch (compressionError) {
-              console.error('Compression failed:', compressionError);
-              alert(
-                `Failed to compress ${file.name}. Please try a smaller image.`
-              );
-              continue;
-            }
-          }
-
+        for (const file of pdfFiles) {
           // Create a FormData object to use with the server action
           const formData = new FormData();
-          formData.append('file', fileToUpload);
+          formData.append('file', file);
 
-          setCompressionStatus(`Processing with AI: ${fileToUpload.name}...`);
-          setCompressionProgress(10);
+          // Call the server action to handle the upload
+          const result = await uploadPDF(formData);
 
-          // Simulate AI processing progress
-          const processingInterval = setInterval(() => {
-            setCompressionProgress(prev => {
-              if (prev < 90) return prev + 10;
-              return prev;
-            });
-          }, 400); // Slower progress to simulate AI processing
-
-          try {
-            // Call the server action to handle the upload
-            const result = await uploadPDF(formData);
-
-            if (!result.success) {
-              throw new Error(result.error);
-            }
-
-            setCompressionStatus(
-              `✓ Receipt processed successfully: ${fileToUpload.name}`
-            );
-            setCompressionProgress(100);
-            newUploadedFiles.push(fileToUpload.name);
-
-            // Show completion status for 2 seconds before processing next file
-            if (i < validFiles.length - 1) {
-              await new Promise(resolve => setTimeout(resolve, 2000));
-            }
-          } finally {
-            clearInterval(processingInterval);
+          if (!result.success) {
+            throw new Error(result.error);
           }
+
+          newUploadedFiles.push(file.name);
         }
         setUploadedFiles(prev => [...prev, ...newUploadedFiles]);
 
-        // Show final completion status for 3 seconds before clearing
-        setCompressionStatus(`✅ All receipts processed successfully!`);
-        setCompressionProgress(100);
-
+        // Clear uploaded files list after 5 seconds
         setTimeout(() => {
           setUploadedFiles([]);
-          setCompressionStatus('');
-          setCompressionProgress(0);
-        }, 3000);
+        }, 5000);
 
         router.push('/receipts');
       } catch (error) {
         console.error('Upload failed:', error);
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error';
-
-        // Show more user-friendly error messages
-        let userMessage = errorMessage;
-        if (errorMessage.includes('1MB limit')) {
-          userMessage = 'File too large. Please use files smaller than 1MB.';
-        } else if (errorMessage.includes('API request failed')) {
-          userMessage =
-            'Receipt processing service is unavailable. Please try again later.';
-        } else if (errorMessage.includes('Not Authorized')) {
-          userMessage = 'Please sign in to upload receipts.';
-        } else if (errorMessage.includes('file type')) {
-          userMessage =
-            'Please upload only PDF files or images (JPG, PNG, HEIC, WebP).';
-        }
-
-        alert(`Upload failed: ${userMessage}`);
+        alert(
+          `Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
       } finally {
         setIsUploading(false);
-        setCompressionStatus('');
-        setCompressionProgress(0);
       }
     },
     [user, router]
@@ -242,29 +145,7 @@ function PDFDropzone() {
           {isUploading ? (
             <div className="flex flex-col items-center">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-2"></div>
-              <p className="mb-2">
-                {compressionStatus.includes('Compressing')
-                  ? 'Compressing Image...'
-                  : compressionStatus.includes('Processing with AI')
-                    ? 'Processing Receipt with AI...'
-                    : 'Processing...'}
-              </p>
-              {compressionStatus && (
-                <div className="w-full max-w-md">
-                  <div className="flex items-center text-sm text-blue-600 mb-2">
-                    <ArrowDownCircle className="h-4 w-4 mr-1 flex-shrink-0" />
-                    <span className="truncate">{compressionStatus}</span>
-                  </div>
-                  {compressionProgress > 0 && (
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
-                        style={{ width: `${compressionProgress}%` }}
-                      ></div>
-                    </div>
-                  )}
-                </div>
-              )}
+              <p>Uploading...</p>
             </div>
           ) : !isUserSignedIn ? (
             <>
@@ -277,16 +158,12 @@ function PDFDropzone() {
             <>
               <CloudUpload className="mx-auto h-12 w-12 text-gray-400" />
               <p className="mt-2 text-sm text-gray-600">
-                Drag and drop receipts here, or click to select files
-              </p>
-              <p className="mt-1 text-xs text-gray-500">
-                Supports PDF files and photos (JPG, PNG, HEIC). Large images
-                will be automatically compressed.
+                Drag and drop PDF files here, or click to select files
               </p>
               <input
                 type="file"
                 ref={fileInputRef}
-                accept="application/pdf,.pdf,.jpg,.jpeg,.png,.heic,.heif,.webp"
+                accept="application/pdf,.pdf,.jpg"
                 multiple
                 onChange={handleFileInputChange}
                 className="hidden"
@@ -305,7 +182,7 @@ function PDFDropzone() {
         <div className="mt-4">
           {featureUsageExceeded && (
             <div className="flex items-center p-3 bg-red-50 border border-red-200 rounded-md text-red-600">
-              <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0">
+              <AlertCircle className="h-5 w-5 mr-2 shrink-0">
                 <span>
                   You have exceeded your limit of {featureAllocation} scans.
                   Please upgrade to continue.

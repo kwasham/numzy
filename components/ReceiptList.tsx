@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
 import { api } from '@/convex/_generated/api';
-import { Doc } from '@/convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
 import { useUser } from '@clerk/nextjs';
 import { ChevronRight, FileText } from 'lucide-react';
@@ -89,7 +88,11 @@ function ReceiptList() {
                   {new Date(receipt.uploadedAt).toLocaleString()}
                 </TableCell>
                 <TableCell>{formatFileSize(receipt.size)}</TableCell>
-                <TableCell>{receipt.total || '-'}</TableCell>
+                <TableCell>
+                  {receipt.transactionAmount
+                    ? `${receipt.transactionAmount} ${receipt.currency || ''}`
+                    : '-'}
+                </TableCell>
                 <TableCell>
                   <span
                     className={`px-2 py-1 rounded-full text-xs ${receipt.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : receipt.status === 'processed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}

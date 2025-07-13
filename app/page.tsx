@@ -103,12 +103,10 @@ function Home() {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 max-w-5xl mx-auto">
-            <div className="flex flex-col p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div className="flex flex-col p-6 bg-white border border-gray-200 rounded-lg shadow-xs">
               <div className="space-y-2">
                 <h3 className="text-2xl font-bold">Free</h3>
-                <p className="text-gray-500">
-                  Free tier for all to try
-                </p>
+                <p className="text-gray-500">Free tier for all to try</p>
               </div>
               <div className="mt-4">
                 <p className="text-4xl font-bold">$0.00</p>
@@ -136,12 +134,10 @@ function Home() {
                 </Link>
               </div>
             </div>
-            <div className="flex flex-col p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div className="flex flex-col p-6 bg-white border border-gray-200 rounded-lg shadow-xs">
               <div className="space-y-2">
                 <h3 className="text-2xl font-bold">Starter</h3>
-                <p className="text-gray-500">
-                  A taste of expensing goodness
-                </p>
+                <p className="text-gray-500">A taste of expensing goodness</p>
               </div>
               <div className="mt-4">
                 <p className="text-4xl font-bold">$5.99</p>
@@ -179,9 +175,7 @@ function Home() {
               </div>
               <div className="space-y-2">
                 <h3 className="text-2xl font-bold">Pro</h3>
-                <p className="text-gray-500">
-                  Pro features for the pro user!
-                </p>
+                <p className="text-gray-500">Pro features for the pro user!</p>
               </div>
               <div className="mt-4">
                 <p className="text-4xl font-bold">$9.99</p>

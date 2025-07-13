@@ -17,7 +17,7 @@ import { AlertCircle, CheckCircle, CloudUpload } from 'lucide-react';
 
 function PDFDropzone() {
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<string>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();

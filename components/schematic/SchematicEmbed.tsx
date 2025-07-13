@@ -8,6 +8,9 @@ import {
 function SchematicEmbed({
   accessToken,
   componentId,
+}: {
+  accessToken: string;
+  componentId: string;
 }) {
   console.log(accessToken);
   return (

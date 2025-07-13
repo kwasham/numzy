@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { api } from '@/convex/_generated/api';
+import { Doc } from '@/convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
 import { useUser } from '@clerk/nextjs';
 import { ChevronRight, FileText } from 'lucide-react';
@@ -89,9 +90,7 @@ function ReceiptList() {
                 </TableCell>
                 <TableCell>{formatFileSize(receipt.size)}</TableCell>
                 <TableCell>
-                  {receipt.transactionAmount
-                    ? `${receipt.transactionAmount} ${receipt.currency || ''}`
-                    : '-'}
+                  {receipt.total || '-'}
                 </TableCell>
                 <TableCell>
                   <span

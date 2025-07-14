@@ -90,7 +90,8 @@ function ReceiptDropzone() {
             }));
 
             try {
-              const compressionResult = await compressImage(file, {
+              const originalSize = file.size;
+              const compressedFile = await compressImage(file, {
                 maxSizeBytes: 1024 * 1024, // 1MB limit
                 onProgress: progress => {
                   // Could add progress indicator here
@@ -100,18 +101,27 @@ function ReceiptDropzone() {
                 },
               });
 
-              fileToUpload = compressionResult.file;
+              fileToUpload = compressedFile;
+              const compressionRatio =
+                (originalSize - compressedFile.size) / originalSize;
 
               setCompressionStatus(prev => ({
                 ...prev,
                 [file.name]: {
                   isCompressing: false,
-                  result: compressionResult,
+                  result: {
+                    file: compressedFile,
+                    originalSize,
+                    compressedSize: compressedFile.size,
+                    compressionRatio,
+                    quality: 0.8, // estimate
+                    dimensions: { width: 0, height: 0 }, // we'll skip dimensions for now
+                  },
                 },
               }));
 
               console.log(
-                `Compressed ${file.name}: ${formatFileSize(compressionResult.originalSize)} → ${formatFileSize(compressionResult.compressedSize)} (${Math.round(compressionResult.compressionRatio * 100)}% reduction)`
+                `Compressed ${file.name}: ${formatFileSize(originalSize)} → ${formatFileSize(compressedFile.size)} (${Math.round(compressionRatio * 100)}% reduction)`
               );
             } catch (error) {
               console.error(`Failed to compress ${file.name}:`, error);

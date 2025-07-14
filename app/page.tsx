@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { ArrowRight, Search, BarChart, Check, Shield } from 'lucide-react';
-import PDFDropzone from '@/components/PDFDropzone';
+import ReceiptDropzone from '@/components/ReceiptDropzone';
 
 function Home() {
   return (
@@ -36,7 +36,7 @@ function Home() {
         <div className="mt-12 flex justify-center">
           <div className="relative w-full max-w-3xl rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden">
             <div className="p-6 md:p-8 relative">
-              <PDFDropzone />
+              <ReceiptDropzone />
             </div>
           </div>
         </div>

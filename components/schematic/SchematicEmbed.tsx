@@ -14,10 +14,10 @@ function SchematicEmbed({
 }) {
   console.log(accessToken);
   return (
-  <EmbedProvider>
-    <SchematicEmbedComponent accessToken={accessToken} id={componentId} />
-  </EmbedProvider>
-  )
+    <EmbedProvider>
+      <SchematicEmbedComponent accessToken={accessToken} id={componentId} />
+    </EmbedProvider>
+  );
 }
 
 export default SchematicEmbed;

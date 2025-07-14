@@ -40,7 +40,7 @@ function PDFDropzone() {
       const fileArray = Array.from(files);
       const pdfFiles = fileArray.filter(
         file =>
-          file.type === 'application/pdf' || 
+          file.type === 'application/pdf' ||
           file.name.toLowerCase().endsWith('.pdf') ||
           file.name.toLowerCase().endsWith('.jpg')
       );

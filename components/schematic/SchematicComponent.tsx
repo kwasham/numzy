@@ -7,13 +7,28 @@ async function SchematicComponent({ componentId }: { componentId: string }) {
     return null;
   }
 
-  const accessToken = await getTemporaryAccessToken();
+  try {
+    const accessToken = await getTemporaryAccessToken();
 
-  if (!accessToken) {
-    throw new Error('No access token found for user');
+    if (!accessToken) {
+      return (
+        <div className="p-4 text-center">
+          <p className="text-gray-600">Please sign in to manage your plan.</p>
+        </div>
+      );
+    }
+
+    return (
+      <SchematicEmbed accessToken={accessToken} componentId={componentId} />
+    );
+  } catch (error) {
+    console.error('Error getting access token:', error);
+    return (
+      <div className="p-4 text-center">
+        <p className="text-gray-600">Please sign in to manage your plan.</p>
+      </div>
+    );
   }
-
-  return <SchematicEmbed accessToken={accessToken} componentId={componentId} />;
 }
 
 export default SchematicComponent;

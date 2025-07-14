@@ -89,9 +89,7 @@ function ReceiptList() {
                   {new Date(receipt.uploadedAt).toLocaleString()}
                 </TableCell>
                 <TableCell>{formatFileSize(receipt.size)}</TableCell>
-                <TableCell>
-                  {receipt.total || '-'}
-                </TableCell>
+                <TableCell>{receipt.total || '-'}</TableCell>
                 <TableCell>
                   <span
                     className={`px-2 py-1 rounded-full text-xs ${receipt.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : receipt.status === 'processed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
